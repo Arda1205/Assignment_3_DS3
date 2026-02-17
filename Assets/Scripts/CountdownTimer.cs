@@ -11,7 +11,7 @@ public class CountdownTimer : MonoBehaviour
     public AudioSource countdownAudio;
     public AudioSource alarmAudio;
 
-    private float startTimeSeconds = 60f; 
+    private float startTimeSeconds = 90f; 
     private float audioCutoffEarly = 0.25f; // stop audio this many seconds early
 
     private float currentTime;
