@@ -4,40 +4,73 @@ using UnityEngine.UI;
 
 public class PlayerInteraction : MonoBehaviour
 {
-    public float interactRange; // Try 5f?
+    public float interactRange;
     public Camera playerCamera;
     public CrosshairUI crosshairScript;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    // Safe interaction
+    private SafeOpenRegion currentSafeRegion;
+    private bool isHoldingE = false;
 
-    // Update is called once per frame
     void Update()
     {
-        // Shooting an invisible ray that can hit objects. Used to see if the crosshair is pointed at something nearby
+        HandleRaycastCrosshair();
+        HandleSafeHoldInput();
+    }
+
+    // ---------------- RAYCAST CROSSHAIR ----------------
+    void HandleRaycastCrosshair()
+    {
         Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
         RaycastHit hit;
-
 
         if (Physics.Raycast(ray, out hit, interactRange))
         {
             if (hit.collider.CompareTag("Interactable"))
             {
-                crosshairScript.SetInteract(true);  // Calling the crosshair scripts bool
-
-                if (Keyboard.current.eKey.wasPressedThisFrame)
-                {
-                    Button button = hit.collider.GetComponent<Button>();
-
-                    button.Press();
-                }
+                crosshairScript.SetInteract(true);
                 return;
             }
         }
 
-        crosshairScript.SetInteract(false); // Same again but back to normal color
+        crosshairScript.SetInteract(false);
+    }
+
+    // ---------------- SAFE HOLD LOGIC ----------------
+    void HandleSafeHoldInput()
+    {
+        if (currentSafeRegion == null)
+            return;
+
+        // holding E
+        if (Keyboard.current.eKey.isPressed)
+        {
+            isHoldingE = true;
+            currentSafeRegion.FillBar(Time.deltaTime);
+        }
+        else
+        {
+            if (isHoldingE)
+            {
+                currentSafeRegion.StopFilling();
+            }
+
+            isHoldingE = false;
+        }
+    }
+
+    // Called by trigger
+    public void SetSafeRegion(SafeOpenRegion region)
+    {
+        currentSafeRegion = region;
+    }
+
+    public void ClearSafeRegion(SafeOpenRegion region)
+    {
+        if (currentSafeRegion == region)
+        {
+            currentSafeRegion.StopFilling();
+            currentSafeRegion = null;
+        }
     }
 }
