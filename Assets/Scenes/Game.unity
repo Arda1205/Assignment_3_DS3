@@ -31544,7 +31544,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   timerText: {fileID: 1062905524}
-  tipTextToDisable: {fileID: 0}
+  tipTextToDisable: {fileID: 1498586271}
   countdownAudio: {fileID: 225349548}
   alarmAudio: {fileID: 2142210231}
 --- !u!1001 &787944641

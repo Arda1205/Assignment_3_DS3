@@ -989,9 +989,9 @@ GameObject:
   - component: {fileID: 7424331671169514711}
   - component: {fileID: 8542084185833108912}
   - component: {fileID: 7811021227923612263}
+  - component: {fileID: 4520266504779774517}
   - component: {fileID: 110696278912731727}
   - component: {fileID: 8362854920106447609}
-  - component: {fileID: 4520266504779774517}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -1067,44 +1067,6 @@ MonoBehaviour:
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 1
   AllowOwnerToParent: 0
---- !u!114 &110696278912731727
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8563124665496322206}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b167f3cc3d38ed24a9e7c8833a82440b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
-  speed: 5
-  mouseSense: 0.08
-  playerController: {fileID: 8542084185833108912}
-  cameraTransform: {fileID: 204110844813551407}
-  playerCamera: {fileID: 3427365207268939715}
-  gravity: -9.81
---- !u!114 &8362854920106447609
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8563124665496322206}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8fff0568312e1744d82f77233c26b0f0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  interactRange: 4
-  playerCamera: {fileID: 3427365207268939715}
-  crosshairScript: {fileID: 8019375404717335716}
-  pickupUI: {fileID: 4762894742242953714}
-  interactLayer:
-    serializedVersion: 2
-    m_Bits: 8
 --- !u!114 &4520266504779774517
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1151,6 +1113,44 @@ MonoBehaviour:
   SwitchTransformSpaceWhenParented: 0
   Interpolate: 1
   SlerpPosition: 0
+--- !u!114 &110696278912731727
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8563124665496322206}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b167f3cc3d38ed24a9e7c8833a82440b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  speed: 5
+  mouseSense: 0.08
+  playerController: {fileID: 8542084185833108912}
+  cameraTransform: {fileID: 204110844813551407}
+  playerCamera: {fileID: 3427365207268939715}
+  gravity: -9.81
+--- !u!114 &8362854920106447609
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8563124665496322206}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8fff0568312e1744d82f77233c26b0f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  interactRange: 4
+  playerCamera: {fileID: 3427365207268939715}
+  crosshairScript: {fileID: 8019375404717335716}
+  pickupUI: {fileID: 4762894742242953714}
+  interactLayer:
+    serializedVersion: 2
+    m_Bits: 8
 --- !u!1001 &357937375222868453
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -60,15 +60,8 @@ public class CountdownTimer : MonoBehaviour
             currentTime = 0f;
             isCounting = false;
 
-            if (countdownAudio != null && countdownAudio.isPlaying)
-                countdownAudio.Stop();
-
             if (GameEndManager.Instance != null)
                 GameEndManager.Instance.EndGame("Time ran out");
-
-            /*
-            if (alarmAudio != null)
-                alarmAudio.Stop();*/
         }
 
         UpdateTimerDisplay();
@@ -103,4 +96,14 @@ public class CountdownTimer : MonoBehaviour
         // fixed format: hours:minutes:seconds
         timerText.text = string.Format("{0:00}:{1:00}:{2:00}", hours, minutes, seconds);
     }
+
+    public void StopAllAudio()
+    {
+        if (countdownAudio != null && countdownAudio.isPlaying)
+            countdownAudio.Stop();
+
+        if (alarmAudio != null && alarmAudio.isPlaying)
+            alarmAudio.Stop();
+    }
+
 }
