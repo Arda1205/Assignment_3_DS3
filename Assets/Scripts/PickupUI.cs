@@ -176,7 +176,7 @@ public class PickupUI : MonoBehaviour
     {
         if (valuablePickupSFX) audioSource.PlayOneShot(valuablePickupSFX);
 
-        totalMoney += 12000;
+        totalMoney += 8000;
         UpdateMoneyText();
 
         currentTarget.SetActive(false);

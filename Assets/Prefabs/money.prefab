@@ -66,7 +66,7 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: 30f7be3095378f146b271ec8a0b3bcfe, type: 2}
     - target: {fileID: 919132149155446097, guid: 67bcb04ae4b7ef34590ad6610155b821, type: 3}
       propertyPath: m_Name
-      value: dollar
+      value: money
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 67bcb04ae4b7ef34590ad6610155b821, type: 3}
       propertyPath: m_Layer
@@ -83,6 +83,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 67bcb04ae4b7ef34590ad6610155b821, type: 3}
       insertIndex: -1
       addedObject: {fileID: 177917787564371749}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 67bcb04ae4b7ef34590ad6610155b821, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -3544675196882494347}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 67bcb04ae4b7ef34590ad6610155b821, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6621230848198378923}
   m_SourcePrefab: {fileID: 100100000, guid: 67bcb04ae4b7ef34590ad6610155b821, type: 3}
 --- !u!1 &7103597720100875811 stripped
 GameObject:
@@ -110,3 +116,42 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 2, y: 1.9999996, z: 2.1573524}
   m_Center: {x: 0, y: 0, z: 0.07867639}
+--- !u!114 &-3544675196882494347
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7103597720100875811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 2114329875
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 1
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
+--- !u!114 &6621230848198378923
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7103597720100875811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1ec380e57a9c9b445b0c0214086c25ba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  valueAmount: 1000
