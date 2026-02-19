@@ -1,66 +1,84 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.InputSystem;
 using Unity.Netcode; // NEW
 
 public class PlayerController : NetworkBehaviour // NEW
 {
-    public float speed;
-    public float mouseSense;
+    [Header("Movement")]
+    public float speed = 6f;
+    public float mouseSense = 2f;
 
     public CharacterController playerController;
     public Transform cameraTransform;
-
     public Camera playerCamera; // NEW
 
     float xRotation = 0f;
 
+    // --------- Gravity ---------
+    [Header("Gravity")]
+    public float gravity = -9.81f;
+    private float yVelocity;
+
     public override void OnNetworkSpawn() // NEW
     {
-        if(!IsOwner)
+        // Only local player controls themselves
+        if (!IsOwner)
         {
             playerCamera.enabled = false;
+            return;
         }
 
-        // Hide mouse cursor
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
 
-    /*
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        // Hide mouse cursor
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-    }*/
-
-    // Update is called once per frame
     void Update()
     {
-        if(!IsOwner) // NEW
+        if (!IsOwner) return; // NEW
+
+        HandleMovement();
+        HandleMouseLook();
+    }
+
+    void HandleMovement()
+    {
+        Vector2 moveInput = Keyboard.current != null
+            ? new Vector2(
+                (Keyboard.current.aKey.isPressed ? -1 : 0) + (Keyboard.current.dKey.isPressed ? 1 : 0),
+                (Keyboard.current.sKey.isPressed ? -1 : 0) + (Keyboard.current.wKey.isPressed ? 1 : 0)
+              )
+            : Vector2.zero;
+
+        // 🔴 normalize so diagonal isn't faster
+        moveInput = Vector2.ClampMagnitude(moveInput, 1f);
+
+        Vector3 move = transform.right * moveInput.x + transform.forward * moveInput.y;
+
+        // grounded handling
+        if (playerController.isGrounded && yVelocity < 0)
         {
-            return;
+            yVelocity = -2f; // keeps player stuck to ground
         }
 
-        Vector2 moveInput = Keyboard.current != null
-             ? new Vector2 (
-                 (Keyboard.current.aKey.isPressed ? -1 : 0) + (Keyboard.current.dKey.isPressed ? 1 : 0), // a pressed goes -1 in x direction. d for +1 in x direction
-                 (Keyboard.current.sKey.isPressed ? -1 : 0) + (Keyboard.current.wKey.isPressed ? 1 : 0) // s pressed goes -1 in y direction. w for +1 in y direction
-                 ) : Vector2.zero;
+        // gravity
+        yVelocity += gravity * Time.deltaTime;
 
-        Vector3 movePlayer = transform.right * moveInput.x + transform.forward * moveInput.y;
-        playerController.Move(movePlayer * speed * Time.deltaTime);
+        Vector3 finalMove = move * speed + Vector3.up * yVelocity;
 
+        playerController.Move(finalMove * Time.deltaTime);
+    }
+
+    void HandleMouseLook()
+    {
         Vector2 mouseDelta = Mouse.current.delta.ReadValue();
 
-        float mouseX = mouseDelta.x * mouseSense * Time.deltaTime;
-        float mouseY = mouseDelta.y * mouseSense * Time.deltaTime;
+        float mouseX = mouseDelta.x * mouseSense;
+        float mouseY = mouseDelta.y * mouseSense;
 
         xRotation -= mouseY;
-        xRotation = Mathf.Clamp( xRotation, -80f, 80f );
+        xRotation = Mathf.Clamp(xRotation, -80f, 80f);
 
-        cameraTransform.localRotation = Quaternion.Euler(xRotation, 0, 0 );
+        cameraTransform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
         transform.Rotate(Vector3.up * mouseX);
     }
 }

@@ -7,12 +7,17 @@ public class CountdownTimer : MonoBehaviour
     [Header("UI")]
     public TextMeshProUGUI timerText;
 
+    [Header("TIP TEXT TO HIDE")]
+    public TextMeshProUGUI tipTextToDisable;
+
     [Header("Audio")]
     public AudioSource countdownAudio;
     public AudioSource alarmAudio;
 
-    private float startTimeSeconds = 90f; 
+    private float startTimeSeconds = 60f; 
     private float audioCutoffEarly = 0.25f; // stop audio this many seconds early
+
+
 
     private float currentTime;
     private bool isCounting = false;
@@ -58,6 +63,9 @@ public class CountdownTimer : MonoBehaviour
             if (countdownAudio != null && countdownAudio.isPlaying)
                 countdownAudio.Stop();
 
+            if (GameEndManager.Instance != null)
+                GameEndManager.Instance.EndGame("Time ran out");
+
             /*
             if (alarmAudio != null)
                 alarmAudio.Stop();*/
@@ -66,7 +74,7 @@ public class CountdownTimer : MonoBehaviour
         UpdateTimerDisplay();
     }
 
-    void StartCountdown()
+    public void StartCountdown()
     {
         isCounting = true;
         audioStoppedEarly = false;
@@ -77,6 +85,11 @@ public class CountdownTimer : MonoBehaviour
 
         if (alarmAudio != null)
             alarmAudio.Play();
+
+        // hide tip text when countdown begins
+        if (tipTextToDisable != null)
+            tipTextToDisable.gameObject.SetActive(false);
+
 
         UpdateTimerDisplay(); // ensure UI updates immediately to show the start time
     }

@@ -6,11 +6,15 @@ TagManager:
   tags:
   - Interactable
   - Floor
+  - Money
+  - Valuable
+  - Safe
+  - Exit
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Interactable
   - Water
   - UI
   - 

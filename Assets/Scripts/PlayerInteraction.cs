@@ -1,76 +1,97 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.UI;
 
 public class PlayerInteraction : MonoBehaviour
 {
-    public float interactRange;
+    public float interactRange = 5f;
     public Camera playerCamera;
     public CrosshairUI crosshairScript;
+    public PickupUI pickupUI;
 
-    // Safe interaction
-    private SafeOpenRegion currentSafeRegion;
-    private bool isHoldingE = false;
+    // layer mask for interactables only
+    public LayerMask interactLayer;
+
+    private GameObject currentLookTarget;
+    private string currentType = "";
+    private bool holding = false;
 
     void Update()
     {
-        HandleRaycastCrosshair();
-        HandleSafeHoldInput();
+        HandleRaycast();
+
+        if (currentLookTarget == null)
+        {
+            if (holding)
+            {
+                pickupUI.Cancel();
+                holding = false;
+            }
+            return;
+        }
+
+        if (Keyboard.current.eKey.isPressed)
+        {
+            holding = true;
+            pickupUI.StartInteraction(currentLookTarget, currentType);
+            pickupUI.Fill(Time.deltaTime);
+        }
+        else
+        {
+            if (holding)
+            {
+                pickupUI.Cancel();
+                holding = false;
+            }
+        }
     }
 
-    // ---------------- RAYCAST CROSSHAIR ----------------
-    void HandleRaycastCrosshair()
+    void HandleRaycast()
     {
         Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
         RaycastHit hit;
 
-        if (Physics.Raycast(ray, out hit, interactRange))
+        // ONLY hit objects on Interactable layer
+        if (Physics.Raycast(ray, out hit, interactRange, interactLayer))
         {
-            if (hit.collider.CompareTag("Interactable"))
+            GameObject obj = hit.collider.gameObject;
+
+            if (obj.CompareTag("Interactable"))
             {
-                crosshairScript.SetInteract(true);
+                SetTarget(obj, "Safe");
+                return;
+            }
+            else if (obj.CompareTag("Money"))
+            {
+                SetTarget(obj, "Money");
+                return;
+            }
+            else if (obj.CompareTag("Valuable"))
+            {
+                SetTarget(obj, "Valuable");
                 return;
             }
         }
 
+        ClearTarget();
+    }
+
+    void SetTarget(GameObject obj, string type)
+    {
+        currentLookTarget = obj;
+        currentType = type;
+        crosshairScript.SetInteract(true);
+    }
+
+    void ClearTarget()
+    {
+        if (currentLookTarget != null && holding)
+        {
+            pickupUI.Cancel();
+            holding = false;
+        }
+
+        currentLookTarget = null;
+        currentType = "";
         crosshairScript.SetInteract(false);
-    }
-
-    // ---------------- SAFE HOLD LOGIC ----------------
-    void HandleSafeHoldInput()
-    {
-        if (currentSafeRegion == null)
-            return;
-
-        // holding E
-        if (Keyboard.current.eKey.isPressed)
-        {
-            isHoldingE = true;
-            currentSafeRegion.FillBar(Time.deltaTime);
-        }
-        else
-        {
-            if (isHoldingE)
-            {
-                currentSafeRegion.StopFilling();
-            }
-
-            isHoldingE = false;
-        }
-    }
-
-    // Called by trigger
-    public void SetSafeRegion(SafeOpenRegion region)
-    {
-        currentSafeRegion = region;
-    }
-
-    public void ClearSafeRegion(SafeOpenRegion region)
-    {
-        if (currentSafeRegion == region)
-        {
-            currentSafeRegion.StopFilling();
-            currentSafeRegion = null;
-        }
     }
 }
