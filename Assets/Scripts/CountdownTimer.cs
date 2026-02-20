@@ -1,6 +1,6 @@
 using UnityEngine;
 using TMPro;
-using UnityEngine.InputSystem; // NEW INPUT SYSTEM
+using Unity.Netcode;
 
 public class CountdownTimer : MonoBehaviour
 {
@@ -14,96 +14,77 @@ public class CountdownTimer : MonoBehaviour
     public AudioSource countdownAudio;
     public AudioSource alarmAudio;
 
-    private float startTimeSeconds = 60f; 
-    private float audioCutoffEarly = 0.25f; // stop audio this many seconds early
-
-
-
-    private float currentTime;
-    private bool isCounting = false;
-    private bool audioStoppedEarly = false;
+    private GameManager gm;
 
     void Start()
     {
-        currentTime = startTimeSeconds;
-        UpdateTimerDisplay();
+        gm = GameManager.Instance;
+        UpdateTimerDisplay(0f);
+
+        // If GameManager exists and timer is already running, we might want to start audio
+        if (gm != null)
+        {
+            gm.TimerRunning.OnValueChanged += OnTimerRunningChanged;
+            gm.TimerValue.OnValueChanged += OnTimerValueChanged;
+        }
     }
 
-    void Update()
+    private void OnDestroy()
     {
-        // Start countdown on F1 (new input system)
-        if (Keyboard.current != null && Keyboard.current.f1Key.wasPressedThisFrame && !isCounting)
+        if (gm != null)
         {
-            StartCountdown();
-            // don't let the timer tick in the same frame we start it
-            // so the display stays at the full start time for one full second
-            return;
+            gm.TimerRunning.OnValueChanged -= OnTimerRunningChanged;
+            gm.TimerValue.OnValueChanged -= OnTimerValueChanged;
         }
-
-        if (!isCounting)
-            return;
-
-        // count down
-        currentTime -= Time.deltaTime;
-
-        // stop audio slightly early
-        if (!audioStoppedEarly && currentTime <= audioCutoffEarly)
-        {
-            audioStoppedEarly = true;
-
-            if (countdownAudio != null && countdownAudio.isPlaying)
-                countdownAudio.Stop();
-        }
-
-        if (currentTime <= 0f)
-        {
-            currentTime = 0f;
-            isCounting = false;
-
-            if (GameEndManager.Instance != null)
-                GameEndManager.Instance.EndGame("Time ran out");
-        }
-
-        UpdateTimerDisplay();
     }
 
-    public void StartCountdown()
+    void OnTimerValueChanged(float oldVal, float newVal)
     {
-        isCounting = true;
-        audioStoppedEarly = false;
-        currentTime = Mathf.Max(0f, currentTime); // safety
-
-        if (countdownAudio != null)
-            countdownAudio.Play();
-
-        if (alarmAudio != null)
-            alarmAudio.Play();
-
-        // hide tip text when countdown begins
-        if (tipTextToDisable != null)
-            tipTextToDisable.gameObject.SetActive(false);
-
-
-        UpdateTimerDisplay(); // ensure UI updates immediately to show the start time
+        UpdateTimerDisplay(newVal);
     }
 
-    void UpdateTimerDisplay()
+    void OnTimerRunningChanged(bool oldVal, bool newVal)
+    {
+        if (newVal)
+        {
+            // timer started
+            if (countdownAudio != null) countdownAudio.Play();
+            if (alarmAudio != null) alarmAudio.Play();
+
+            if (tipTextToDisable != null)
+                tipTextToDisable.gameObject.SetActive(false);
+        }
+        else
+        {
+            // timer stopped
+            if (countdownAudio != null && countdownAudio.isPlaying) countdownAudio.Stop();
+            if (alarmAudio != null && alarmAudio.isPlaying) alarmAudio.Stop();
+        }
+    }
+
+    void UpdateTimerDisplay(float currentTime)
     {
         int hours = Mathf.FloorToInt(currentTime / 3600f);
         int minutes = Mathf.FloorToInt((currentTime % 3600f) / 60f);
         int seconds = Mathf.FloorToInt(currentTime % 60f);
 
-        // fixed format: hours:minutes:seconds
         timerText.text = string.Format("{0:00}:{1:00}:{2:00}", hours, minutes, seconds);
     }
 
-    public void StopAllAudio()
+    void Update()
     {
-        if (countdownAudio != null && countdownAudio.isPlaying)
-            countdownAudio.Stop();
-
-        if (alarmAudio != null && alarmAudio.isPlaying)
-            alarmAudio.Stop();
+        // Read and display the server-driven timer variable each frame (client-side)
+        if (gm != null)
+        {
+            float t = gm.TimerValue.Value;
+            UpdateTimerDisplay(t);
+        }
     }
 
+    // For GameEndManager or GameManager to stop audio on this client if needed:
+    public void StopAllAudio()
+    {
+        if (countdownAudio != null && countdownAudio.isPlaying) countdownAudio.Stop();
+        if (alarmAudio != null && alarmAudio.isPlaying) alarmAudio.Stop();
+    }
 }

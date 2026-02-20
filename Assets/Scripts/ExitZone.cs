@@ -6,8 +6,11 @@ public class ExitZone : MonoBehaviour
     {
         if (!other.CompareTag("Player")) return;
 
-        // Player escaped, end game
-        if (GameEndManager.Instance != null)
-            GameEndManager.Instance.EndGame("Player escaped with loot");
+        // The player object should have PlayerEscape component which will call the server RPC
+        var escape = other.GetComponent<PlayerEscape>();
+        if (escape != null)
+        {
+            escape.RequestEscape();
+        }
     }
 }

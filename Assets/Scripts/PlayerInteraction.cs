@@ -12,33 +12,67 @@ public class PlayerInteraction : MonoBehaviour
     public LayerMask interactLayer;
 
     private GameObject currentLookTarget;
+    private SafeNetwork currentSafeNetwork;
     private string currentType = "";
     private bool holding = false;
+
+    bool debugAutoHold = false;
 
     void Update()
     {
         HandleRaycast();
 
+        // DEBUG: toggle auto hold with F2
+        if (Keyboard.current.f2Key.wasPressedThisFrame)
+        {
+            debugAutoHold = !debugAutoHold;
+            Debug.Log("Auto Hold: " + debugAutoHold);
+        }
+
         if (currentLookTarget == null)
         {
             if (holding)
             {
+                // if we were holding on a safe, stop holding server-side
+                if (currentSafeNetwork != null)
+                    currentSafeNetwork.StopHoldServerRpc();
+
                 pickupUI.Cancel();
                 holding = false;
             }
             return;
         }
 
-        if (Keyboard.current.eKey.isPressed)
+        bool holdingKey = Keyboard.current.eKey.isPressed || debugAutoHold;
+
+        if (holdingKey)
         {
-            holding = true;
-            pickupUI.StartInteraction(currentLookTarget, currentType);
+            if (!holding)
+            {
+                // starting hold
+                holding = true;
+
+                if (currentType == "Safe" && currentSafeNetwork != null)
+                {
+                    currentSafeNetwork.StartHoldServerRpc();
+                }
+
+                pickupUI.StartInteraction(currentLookTarget, currentType);
+            }
+
+            // continue filling UI (local visual)
             pickupUI.Fill(Time.deltaTime);
         }
         else
         {
             if (holding)
             {
+                // stopping hold
+                if (currentType == "Safe" && currentSafeNetwork != null)
+                {
+                    currentSafeNetwork.StopHoldServerRpc();
+                }
+
                 pickupUI.Cancel();
                 holding = false;
             }
@@ -50,24 +84,29 @@ public class PlayerInteraction : MonoBehaviour
         Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
         RaycastHit hit;
 
-        // ONLY hit objects on Interactable layer
         if (Physics.Raycast(ray, out hit, interactRange, interactLayer))
         {
             GameObject obj = hit.collider.gameObject;
 
-            if (obj.CompareTag("Interactable"))
+            // detect safe specially (we need SafeNetwork component)
+            SafeNetwork sn = obj.GetComponentInParent<SafeNetwork>();
+
+            if (sn != null && obj.CompareTag("Interactable"))
             {
                 SetTarget(obj, "Safe");
+                currentSafeNetwork = sn;
                 return;
             }
             else if (obj.CompareTag("Money"))
             {
                 SetTarget(obj, "Money");
+                currentSafeNetwork = null;
                 return;
             }
             else if (obj.CompareTag("Valuable"))
             {
                 SetTarget(obj, "Valuable");
+                currentSafeNetwork = null;
                 return;
             }
         }
@@ -86,12 +125,17 @@ public class PlayerInteraction : MonoBehaviour
     {
         if (currentLookTarget != null && holding)
         {
+            // Stop server hold if it was a safe
+            if (currentSafeNetwork != null)
+                currentSafeNetwork.StopHoldServerRpc();
+
             pickupUI.Cancel();
             holding = false;
         }
 
         currentLookTarget = null;
         currentType = "";
+        currentSafeNetwork = null;
         crosshairScript.SetInteract(false);
     }
 }

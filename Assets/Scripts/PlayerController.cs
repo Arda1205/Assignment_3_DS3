@@ -19,18 +19,29 @@ public class PlayerController : NetworkBehaviour // NEW
     public float gravity = -9.81f;
     private float yVelocity;
 
-    public override void OnNetworkSpawn() // NEW
+    public override void OnNetworkSpawn()
     {
-        // Only local player controls themselves
+        // find player's canvas and enable only for the owner
+        var canvas = GetComponentInChildren<UnityEngine.Canvas>(true);
+        if (canvas != null)
+        {
+            canvas.gameObject.SetActive(IsOwner);
+        }
+
+        // Local camera only for owner
         if (!IsOwner)
         {
-            playerCamera.enabled = false;
+            if (playerCamera != null) playerCamera.enabled = false;
+            // we return so we don't lock the cursor for non-local players
             return;
         }
 
+        // For the local owner: lock cursor and enable camera
+        if (playerCamera != null) playerCamera.enabled = true;
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
+
 
     void Update()
     {

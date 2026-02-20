@@ -17,29 +17,30 @@ public class PickupNetwork : NetworkBehaviour
 
         ulong clientId = rpcParams.Receive.SenderClientId;
 
-        // add money to the player's PlayerState (server authoritative)
-        if (NetworkManager.Singleton.ConnectedClients.ContainsKey(clientId))
+        // credit money to the player's PlayerState
+        if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientId, out var client))
         {
-            var playerObj = NetworkManager.Singleton.ConnectedClients[clientId].PlayerObject;
+            var playerObj = client.PlayerObject;
             if (playerObj != null)
             {
                 var state = playerObj.GetComponent<PlayerState>();
                 if (state != null)
                 {
-                    // server directly updates network variable
                     state.Money.Value += valueAmount;
                 }
             }
         }
 
-        // despawn this network object for everyone
-        if (NetworkObject != null && NetworkManager.Singleton.IsServer)
+        // if this NetworkObject is spawned by Netcode, do a server-side despawn to notify clients
+        if (NetworkObject != null && NetworkManager.Singleton.IsServer && NetworkObject.IsSpawned)
         {
-            NetworkObject.Despawn(true); // true = destroy on despawn
+            NetworkObject.Despawn(true); // destroys across clients
         }
         else
         {
+            // fallback local destroy
             Destroy(gameObject);
         }
     }
+
 }

@@ -275,8 +275,9 @@ GameObject:
   m_Component:
   - component: {fileID: 204110844813551407}
   - component: {fileID: 3427365207268939715}
-  - component: {fileID: 1558057852391017247}
   - component: {fileID: 3704721979023555299}
+  - component: {fileID: 8774276620588240163}
+  - component: {fileID: 359040714480975079}
   m_Layer: 0
   m_Name: PlayerCam
   m_TagString: MainCamera
@@ -350,14 +351,6 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
---- !u!81 &1558057852391017247
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2048466001248413107}
-  m_Enabled: 1
 --- !u!114 &3704721979023555299
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -402,6 +395,27 @@ MonoBehaviour:
     m_MipBias: 0
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
+--- !u!114 &8774276620588240163
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2048466001248413107}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e05af7c2a3bd7140a2ec322941f0332, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+--- !u!81 &359040714480975079
+AudioListener:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2048466001248413107}
+  m_Enabled: 1
 --- !u!1 &2196914236156063529
 GameObject:
   m_ObjectHideFlags: 0
@@ -991,6 +1005,7 @@ GameObject:
   - component: {fileID: 7811021227923612263}
   - component: {fileID: 4520266504779774517}
   - component: {fileID: 8119755205653958213}
+  - component: {fileID: 9204308926520136288}
   - component: {fileID: 110696278912731727}
   - component: {fileID: 8362854920106447609}
   m_Layer: 0
@@ -1129,6 +1144,19 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   Money:
     m_InternalValue: 0
+--- !u!114 &9204308926520136288
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8563124665496322206}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5b0f39e82f5f304db37ce9aa60972c0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!114 &110696278912731727
 MonoBehaviour:
   m_ObjectHideFlags: 0

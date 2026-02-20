@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using Unity.Netcode;
+using System;
 
 public class PickupUI : MonoBehaviour
 {
@@ -10,12 +12,12 @@ public class PickupUI : MonoBehaviour
     public Slider valuableBar;
 
     [Header("TIMES")]
-    public float safeFillTime = 5f;
+    public float safeFillTime = 5f; // kept for local smoothing if needed
     public float moneyFillTime = 1f;
-    public float valuableFillTime = 4f;
+    public float valuableFillTime = 3f;
 
     [Header("SAFE")]
-    public GameObject safeParent;
+    public GameObject safeParent; // optional, scene safe
 
     [Header("MONEY TOTAL UI")]
     public TextMeshProUGUI moneyText;
@@ -28,41 +30,79 @@ public class PickupUI : MonoBehaviour
     public AudioClip safeOpenSFX;
     public AudioClip moneyPickupSFX;
     public AudioClip valuablePickupSFX;
-    //public AudioClip cancelSFX;
 
-    private float safeValue;
+    private float safeValueLocal;
     private float moneyValue;
     private float valuableValue;
-
-    private int totalMoney = 0;
 
     private GameObject currentTarget;
     private string currentType = "";
 
-    [System.Obsolete]
+    private PlayerState myState;
+
+    [Obsolete]
     void Start()
     {
+        // init bars to 0..100
         SetupBar(safeBar);
         SetupBar(moneyBar);
         SetupBar(valuableBar);
 
-        UpdateMoneyText();
-
-        // auto find safe
-        if (safeParent == null)
+        // find PlayerState on same prefab (this canvas is on the player prefab)
+        myState = GetComponentInParent<PlayerState>();
+        if (myState != null)
         {
-            GameObject safeObj = GameObject.FindWithTag("Safe");
-            if (safeObj != null)
-                safeParent = safeObj;
+            UpdateMoneyText(myState.Money.Value);
+            myState.Money.OnValueChanged += OnMoneyChanged;
+        }
+        else
+        {
+            UpdateMoneyText(0);
         }
 
-        // auto find countdown timer
+        // auto-find safe if not assigned
+        if (safeParent == null)
+        {
+            var found = GameObject.FindWithTag("Safe");
+            if (found != null)
+                safeParent = found;
+        }
+
+        if (safeParent != null)
+        {
+            var safeNet = safeParent.GetComponent<SafeNetwork>();
+            if (safeNet != null)
+            {
+                // initial set
+                safeBar.value = safeNet.Progress.Value * 100f;
+
+                // subscribe
+                safeNet.Progress.OnValueChanged += (oldv, newv) => { safeBar.value = newv * 100f; };
+
+                safeNet.IsOpen.OnValueChanged += (oldv, newv) => {
+                    if (newv) safeBar.value = 100f;
+                };
+            }
+        }
+
+
+        // auto find countdown timer if null
         if (countdownTimer == null)
         {
             countdownTimer = FindObjectOfType<CountdownTimer>();
         }
     }
 
+    void OnDestroy()
+    {
+        if (myState != null)
+            myState.Money.OnValueChanged -= OnMoneyChanged;
+    }
+
+    private void OnMoneyChanged(int oldVal, int newVal)
+    {
+        UpdateMoneyText(newVal);
+    }
 
     void SetupBar(Slider s)
     {
@@ -71,19 +111,20 @@ public class PickupUI : MonoBehaviour
         s.value = 0;
     }
 
-    void UpdateMoneyText()
+    void UpdateMoneyText(int value)
     {
-        moneyText.text = "$" + totalMoney.ToString();
+        if (moneyText != null)
+            moneyText.text = "$" + value.ToString();
     }
 
-    // Called by player when starting interaction
+    // Called by PlayerInteraction when starting interaction (local only)
     public void StartInteraction(GameObject target, string type)
     {
         currentTarget = target;
         currentType = type;
     }
 
-    // Called every frame holding E
+    // Called every frame while E held (local UI fill)
     public void Fill(float dt)
     {
         if (currentTarget == null) return;
@@ -91,32 +132,41 @@ public class PickupUI : MonoBehaviour
         switch (currentType)
         {
             case "Safe":
-                safeValue += (100f / safeFillTime) * dt;
-                safeBar.value = safeValue;
-
-                if (safeValue >= 100f)
-                {
-                    CompleteSafe();
-                }
+                // safe progress is authoritative on server; we still show local increment while player holds
+                // local bar will be overwritten by SafeNetwork.Progress OnValueChanged subscription.
+                // Keep a small local visual if you want:
                 break;
 
             case "Money":
                 moneyValue += (100f / moneyFillTime) * dt;
                 moneyBar.value = moneyValue;
-
                 if (moneyValue >= 100f)
                 {
-                    CompleteMoney();
+                    // request server to pickup this item
+                    var pickupNet = currentTarget.GetComponent<PickupNetwork>();
+                    if (pickupNet != null)
+                        pickupNet.RequestPickupServerRpc();
+
+                    if (moneyPickupSFX != null) audioSource.PlayOneShot(moneyPickupSFX);
+
+                    ResetBars();
+                    currentTarget = null;
                 }
                 break;
 
             case "Valuable":
                 valuableValue += (100f / valuableFillTime) * dt;
                 valuableBar.value = valuableValue;
-
                 if (valuableValue >= 100f)
                 {
-                    CompleteValuable();
+                    var pickupNet = currentTarget.GetComponent<PickupNetwork>();
+                    if (pickupNet != null)
+                        pickupNet.RequestPickupServerRpc();
+
+                    if (valuablePickupSFX != null) audioSource.PlayOneShot(valuablePickupSFX);
+
+                    ResetBars();
+                    currentTarget = null;
                 }
                 break;
         }
@@ -124,10 +174,6 @@ public class PickupUI : MonoBehaviour
 
     public void Cancel()
     {
-        if (currentTarget == null) return;
-
-        //if (cancelSFX != null) audioSource.PlayOneShot(cancelSFX);
-
         ResetBars();
         currentTarget = null;
         currentType = "";
@@ -135,53 +181,9 @@ public class PickupUI : MonoBehaviour
 
     void ResetBars()
     {
-        safeValue = 0;
-        moneyValue = 0;
-        valuableValue = 0;
-
-        safeBar.value = 0;
-        moneyBar.value = 0;
-        valuableBar.value = 0;
-    }
-
-    void CompleteSafe()
-    {
-        if (safeOpenSFX) audioSource.PlayOneShot(safeOpenSFX);
-
-        if (safeParent) safeParent.SetActive(false);
-
-        // START COUNTDOWN WHEN SAFE OPENS
-        if (countdownTimer != null)
-            countdownTimer.StartCountdown();
-
-        ResetBars();
-        currentTarget = null;
-    }
-
-
-    void CompleteMoney()
-    {
-        if (moneyPickupSFX) audioSource.PlayOneShot(moneyPickupSFX);
-
-        totalMoney += 1000;
-        UpdateMoneyText();
-
-        currentTarget.SetActive(false);
-
-        ResetBars();
-        currentTarget = null;
-    }
-
-    void CompleteValuable()
-    {
-        if (valuablePickupSFX) audioSource.PlayOneShot(valuablePickupSFX);
-
-        totalMoney += 8000;
-        UpdateMoneyText();
-
-        currentTarget.SetActive(false);
-
-        ResetBars();
-        currentTarget = null;
+        moneyValue = 0f;
+        valuableValue = 0f;
+        moneyBar.value = 0f;
+        valuableBar.value = 0f;
     }
 }
