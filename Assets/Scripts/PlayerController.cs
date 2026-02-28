@@ -28,6 +28,14 @@ public class PlayerController : NetworkBehaviour // NEW
             canvas.gameObject.SetActive(IsOwner);
         }
 
+        
+        // Hide local player mesh
+        var capsuleRenderer = GetComponentInChildren<MeshRenderer>();
+        if (capsuleRenderer != null)
+        {
+            capsuleRenderer.enabled = !IsOwner;
+        }
+
         // Local camera only for owner
         if (!IsOwner)
         {
@@ -45,7 +53,9 @@ public class PlayerController : NetworkBehaviour // NEW
 
     void Update()
     {
-        if (!IsOwner) return; // NEW
+        if (!IsOwner) return;
+
+        if (Time.timeScale == 0f) return;
 
         HandleMovement();
         HandleMouseLook();
@@ -60,7 +70,7 @@ public class PlayerController : NetworkBehaviour // NEW
               )
             : Vector2.zero;
 
-        // 🔴 normalize so diagonal isn't faster
+        // normalize so diagonal isn't faster
         moveInput = Vector2.ClampMagnitude(moveInput, 1f);
 
         Vector3 move = transform.right * moveInput.x + transform.forward * moveInput.y;
@@ -86,10 +96,12 @@ public class PlayerController : NetworkBehaviour // NEW
         float mouseX = mouseDelta.x * mouseSense;
         float mouseY = mouseDelta.y * mouseSense;
 
+        // vertical
         xRotation -= mouseY;
         xRotation = Mathf.Clamp(xRotation, -80f, 80f);
-
         cameraTransform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
-        transform.Rotate(Vector3.up * mouseX);
+
+        // horizontal (rotate body in place)
+        transform.localRotation *= Quaternion.Euler(0f, mouseX, 0f);
     }
 }

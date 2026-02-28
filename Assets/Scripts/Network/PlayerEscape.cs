@@ -3,32 +3,37 @@ using Unity.Netcode;
 
 public class PlayerEscape : NetworkBehaviour
 {
-    // Called locally by ExitZone when player touches exit
+    public NetworkVariable<bool> HasEscaped = new NetworkVariable<bool>(
+        false,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server);
+
+    public NetworkVariable<float> EscapeTimeLeft = new NetworkVariable<float>(
+    0f,
+    NetworkVariableReadPermission.Everyone,
+    NetworkVariableWritePermission.Server);
+
     public void RequestEscape()
     {
-        if (!IsOwner) return; // only local player calls
+        if (!IsOwner) return;
         RequestEscapeServerRpc();
     }
 
     [ServerRpc(RequireOwnership = false)]
     private void RequestEscapeServerRpc(ServerRpcParams rpcParams = default)
     {
+        if (HasEscaped.Value) return;
+
         ulong clientId = rpcParams.Receive.SenderClientId;
 
-        // Validate: game must have begun (timer running) or whatever rule you want
-        if (GameManager.Instance != null)
+        if (GameManager.Instance != null &&
+            GameManager.Instance.TimerRunning.Value)
         {
-            // If timer is not running, maybe allow immediate exit? adjust logic as desired.
-            // We'll allow escape only after the safe is open (GameManager.TimerRunning)
-            if (GameManager.Instance.TimerRunning.Value)
-            {
-                // end game for THIS client only
-                GameManager.Instance.EndForClient(clientId, "Player escaped with loot");
-            }
-            else
-            {
-                // Not allowed yet - optionally send feedback to that client
-            }
+            HasEscaped.Value = true;
+
+            EscapeTimeLeft.Value = GameManager.Instance.TimerValue.Value;
+
+            GameManager.Instance.RegisterEscape(clientId);
         }
     }
 }

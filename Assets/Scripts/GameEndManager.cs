@@ -11,15 +11,24 @@ public class GameEndManager : MonoBehaviour
         Instance = this;
     }
 
-    // Called locally (client). Freezes time & shows cursor.
+    [System.Obsolete]
+
     public void EndGame(string reason)
     {
         if (gameEnded) return;
         gameEnded = true;
+
         Debug.Log("GAME OVER: " + reason);
 
-        // freeze time for local client
-        Time.timeScale = 0f;
+        foreach (var player in FindObjectsOfType<PlayerController>())
+        {
+            if (player.IsOwner)
+            {
+                player.enabled = false;
+                break;
+            }
+        }
+
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }

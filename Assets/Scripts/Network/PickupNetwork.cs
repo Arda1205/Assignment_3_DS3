@@ -1,14 +1,13 @@
-using Unity.Netcode;
+﻿using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.Playables;
 
 public class PickupNetwork : NetworkBehaviour
 {
     [Header("Pickup")]
     public int valueAmount = 1000;
+
     private bool picked = false;
 
-    // Client calls this to request the server to give them the item
     [ServerRpc(RequireOwnership = false)]
     public void RequestPickupServerRpc(ServerRpcParams rpcParams = default)
     {
@@ -17,7 +16,7 @@ public class PickupNetwork : NetworkBehaviour
 
         ulong clientId = rpcParams.Receive.SenderClientId;
 
-        // credit money to the player's PlayerState
+        // Give money
         if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientId, out var client))
         {
             var playerObj = client.PlayerObject;
@@ -31,16 +30,18 @@ public class PickupNetwork : NetworkBehaviour
             }
         }
 
-        // if this NetworkObject is spawned by Netcode, do a server-side despawn to notify clients
-        if (NetworkObject != null && NetworkManager.Singleton.IsServer && NetworkObject.IsSpawned)
-        {
-            NetworkObject.Despawn(true); // destroys across clients
-        }
-        else
-        {
-            // fallback local destroy
-            Destroy(gameObject);
-        }
+        // Instead of Despawn, force disable for everyone
+        DisablePickupClientRpc();
     }
 
+    [ClientRpc]
+    void DisablePickupClientRpc()
+    {
+        // disable visuals + collider so it can't be picked again
+        var col = GetComponent<Collider>();
+        if (col != null)
+            col.enabled = false;
+
+        gameObject.SetActive(false);
+    }
 }
