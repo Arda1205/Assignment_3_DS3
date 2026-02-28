@@ -57,6 +57,15 @@ public class SafeNetwork : NetworkBehaviour
     {
         if (safeParentToDisable != null)
             safeParentToDisable.SetActive(false);
+
+        // Disable auto hold on the LOCAL player
+        var localPlayer = NetworkManager.Singleton.LocalClient?.PlayerObject;
+        if (localPlayer != null)
+        {
+            var interaction = localPlayer.GetComponent<PlayerInteraction>();
+            if (interaction != null)
+                interaction.DisableAutoHold();
+        }
     }
 
     // Called by clients when they start holding E

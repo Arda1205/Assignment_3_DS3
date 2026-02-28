@@ -138,4 +138,13 @@ public class PlayerInteraction : MonoBehaviour
         currentSafeNetwork = null;
         crosshairScript.SetInteract(false);
     }
+
+    public void DisableAutoHold()
+    {
+        if (debugAutoHold)
+        {
+            debugAutoHold = false;
+            Debug.Log("Auto Hold disabled (safe opened)");
+        }
+    }
 }
