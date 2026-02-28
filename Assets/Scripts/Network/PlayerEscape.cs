@@ -13,6 +13,7 @@ public class PlayerEscape : NetworkBehaviour
     NetworkVariableReadPermission.Everyone,
     NetworkVariableWritePermission.Server);
 
+    [System.Obsolete]
     public void RequestEscape()
     {
         if (!IsOwner) return;
@@ -20,6 +21,7 @@ public class PlayerEscape : NetworkBehaviour
     }
 
     [ServerRpc(RequireOwnership = false)]
+    [System.Obsolete]
     private void RequestEscapeServerRpc(ServerRpcParams rpcParams = default)
     {
         if (HasEscaped.Value) return;

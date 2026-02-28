@@ -2,6 +2,7 @@
 
 public class ExitZone : MonoBehaviour
 {
+    [System.Obsolete]
     void OnTriggerEnter(Collider other)
     {
         if (!other.CompareTag("Player")) return;

@@ -216,7 +216,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 2720698855
+  GlobalObjectIdHash: 1509432541
   InScenePlacedSourceGlobalObjectIdHash: 1509432541
   DeferredDespawnTick: 0
   Ownership: 1
@@ -242,7 +242,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  valueAmount: 8000
+  valueAmount: 6000
 --- !u!1 &3114013325527367633
 GameObject:
   m_ObjectHideFlags: 0

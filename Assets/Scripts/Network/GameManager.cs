@@ -35,6 +35,7 @@ public class GameManager : NetworkBehaviour
         Instance = this;
     }
 
+    [System.Obsolete]
     void Update()
     {
         if (!IsServer || gameEnded) return;
@@ -110,7 +111,7 @@ public class GameManager : NetworkBehaviour
 
             int money = state.Money.Value;
             float timeLeft = escape.HasEscaped.Value ? escape.EscapeTimeLeft.Value : 0f;
-            int score = money + Mathf.RoundToInt(timeLeft) * 2000;
+            int score = money + Mathf.RoundToInt(timeLeft) * 500;
 
             if (id == 0)
             {
