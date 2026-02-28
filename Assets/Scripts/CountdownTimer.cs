@@ -2,6 +2,7 @@ using UnityEngine;
 using TMPro;
 using Unity.Netcode;
 
+// Handles displaying and updating the countdown timer UI during gameplay
 public class CountdownTimer : MonoBehaviour
 {
     [Header("UI")]

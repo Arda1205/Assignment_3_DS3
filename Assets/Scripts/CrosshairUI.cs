@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+// Controls crosshair visual feedback when aiming at interactable objects
 public class CrosshairUI : MonoBehaviour
 {
     // This script will be accessed by player interaction to change its color

@@ -1,5 +1,6 @@
 using UnityEngine;
 
+// Stores final match results temporarily for use in the summary scene
 public static class FinalGameData
 {
     public static int player1Money;

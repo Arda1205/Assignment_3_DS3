@@ -2,16 +2,17 @@ using UnityEngine;
 using Unity.Netcode;
 using System.Collections.Generic;
 
+// Manages cooperative safe opening logic and synchronizes progress across players
 public class SafeNetwork : NetworkBehaviour
 {
     [Header("Settings")]
     public float safeFillTime = 5f;
-    public int requiredHolders = 2; // how many players must hold to progress
+    public int requiredHolders = 2; // How many players must hold to progress
 
     [Header("Visual")]
-    public GameObject safeParentToDisable; // the visible safe model / door to hide when opened
+    public GameObject safeParentToDisable; // The visible safe model / door to hide when opened
 
-    // progress 0..1, server-write only
+    // Progress 0..1, server-write only
     public NetworkVariable<float> Progress = new NetworkVariable<float>(
         0f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
@@ -25,7 +26,7 @@ public class SafeNetwork : NetworkBehaviour
         if (!IsServer) return;
         if (IsOpen.Value) return;
 
-        // progress only if required number of clients hold
+        // Progress only if required number of clients hold
         if (holders.Count >= requiredHolders)
         {
             Progress.Value = Mathf.Clamp01(Progress.Value + (Time.deltaTime / safeFillTime));
@@ -37,17 +38,17 @@ public class SafeNetwork : NetworkBehaviour
         }
         else
         {
-            // optional: slowly regress if nobody holding
+            // Slowly regress if nobody holding
             Progress.Value = Mathf.Max(0f, Progress.Value - Time.deltaTime * 0.15f);
         }
     }
 
     private void OnOpenedServer()
     {
-        // notify clients to visually open/disable the safe
+        // Notify clients to visually open/disable the safe
         SetSafeOpenClientRpc();
 
-        // tell GameManager (server) to start the timer
+        // Tell GameManager (server) to start the timer
         if (GameManager.Instance != null)
             GameManager.Instance.StartTimerServerRpc();
     }

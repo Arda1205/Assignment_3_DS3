@@ -1,6 +1,7 @@
 using UnityEngine;
 using Unity.Netcode;
 
+// Ensures only the local player has an active audio listener in multiplayer
 [RequireComponent(typeof(AudioListener))]
 public class LocalAudioListener : NetworkBehaviour
 {

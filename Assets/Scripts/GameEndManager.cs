@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 
+// Manages local end game state such as freezing movement and unlocking the cursor
 public class GameEndManager : MonoBehaviour
 {
     public static GameEndManager Instance { get; private set; }

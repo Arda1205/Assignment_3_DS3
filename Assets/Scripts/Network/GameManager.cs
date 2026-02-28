@@ -5,8 +5,10 @@ using UnityEngine.SceneManagement;
 using System.Collections;
 using System.Collections.Generic;
 
+// Central server authority that controls timer logic, win conditions, and scene transitions
 public class GameManager : NetworkBehaviour
 {
+    // Singleton reference so other scripts can access the active GameManager
     public static GameManager Instance { get; private set; }
 
     [Header("Timer")]
@@ -19,6 +21,7 @@ public class GameManager : NetworkBehaviour
         false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     [Header("UI")]
+    // References to UI elements shown on all clients
     public TextMeshProUGUI player1EscapedText;
     public TextMeshProUGUI player2EscapedText;
     public TextMeshProUGUI gameOverText;
@@ -27,7 +30,9 @@ public class GameManager : NetworkBehaviour
     public AudioSource gameOverAudioSource;
     public AudioClip gameOverSFX;
 
+    // Tracks which clients have successfully escaped
     private HashSet<ulong> escapedPlayers = new HashSet<ulong>();
+
     private bool gameEnded = false;
 
     void Awake()
@@ -35,15 +40,18 @@ public class GameManager : NetworkBehaviour
         Instance = this;
     }
 
+    // Server-only update loop that controls the countdown timer
     [System.Obsolete]
     void Update()
     {
+        // Only the server updates the timer
         if (!IsServer || gameEnded) return;
 
         if (TimerRunning.Value)
         {
             TimerValue.Value -= Time.deltaTime;
 
+            // When timer reaches zero, end the game
             if (TimerValue.Value <= 0f)
             {
                 TimerValue.Value = 0f;
@@ -53,30 +61,35 @@ public class GameManager : NetworkBehaviour
         }
     }
 
+    // Called by PlayerEscape when a player reaches the exit
     [System.Obsolete]
     public void RegisterEscape(ulong clientId)
     {
         if (!IsServer || gameEnded) return;
 
+        // Ensure the player is only registered once
         if (!escapedPlayers.Contains(clientId))
             escapedPlayers.Add(clientId);
 
         ShowEscapedClientRpc(clientId);
+
         FreezePlayerClientRpc(clientId);
 
+        // If all connected players escaped, end the match
         if (escapedPlayers.Count >= NetworkManager.Singleton.ConnectedClients.Count)
         {
             EndGameServer();
         }
     }
 
+    // Server-side logic for ending the game
     [System.Obsolete]
     void EndGameServer()
     {
         if (gameEnded) return;
         gameEnded = true;
 
-        // Remove money from players who did not escape
+        // Remove money from players who did not escape before time ran out
         foreach (var kvp in NetworkManager.Singleton.ConnectedClients)
         {
             var playerObj = kvp.Value.PlayerObject;
@@ -92,9 +105,7 @@ public class GameManager : NetworkBehaviour
             }
         }
 
-        // Calculate final data BEFORE scene load
-        var clients = NetworkManager.Singleton.ConnectedClients;
-
+        // Calculate final match data before changing scenes
         int p1Money = 0, p2Money = 0;
         float p1Time = 0f, p2Time = 0f;
         int p1Score = 0, p2Score = 0;
@@ -109,6 +120,7 @@ public class GameManager : NetworkBehaviour
             var escape = playerObj.GetComponent<PlayerEscape>();
             if (state == null || escape == null) continue;
 
+            // Final score combines money and time left
             int money = state.Money.Value;
             float timeLeft = escape.HasEscaped.Value ? escape.EscapeTimeLeft.Value : 0f;
             int score = money + Mathf.RoundToInt(timeLeft) * 500;
@@ -127,14 +139,16 @@ public class GameManager : NetworkBehaviour
             }
         }
 
-        // Send to all clients
+        // Send final results to all clients before scene transition
         SendFinalResultsClientRpc(p1Money, p1Time, p1Score,
                                   p2Money, p2Time, p2Score);
 
+        // Show game over UI and freeze players.
         ShowGameOverClientRpc();
         FreezeAllClientRpc();
     }
 
+    // Displays escaped UI per player on all clients
     [ClientRpc]
     void ShowEscapedClientRpc(ulong clientId)
     {
@@ -145,6 +159,7 @@ public class GameManager : NetworkBehaviour
             player2EscapedText.gameObject.SetActive(true);
     }
 
+    // Displays game over UI and triggers summary scene load
     [ClientRpc]
     void ShowGameOverClientRpc()
     {
@@ -157,16 +172,19 @@ public class GameManager : NetworkBehaviour
         StartCoroutine(LoadSummaryAfterDelay());
     }
 
+    // Waits before transitioning scenes so players can see the result
     IEnumerator LoadSummaryAfterDelay()
     {
         yield return new WaitForSecondsRealtime(3f);
 
+        // Only the server initiates scene change
         if (IsServer)
         {
             NetworkManager.SceneManager.LoadScene("Summary", UnityEngine.SceneManagement.LoadSceneMode.Single);
         }
     }
 
+    // Freezes all players locally
     [ClientRpc]
     [System.Obsolete]
     void FreezeAllClientRpc()
@@ -174,6 +192,7 @@ public class GameManager : NetworkBehaviour
         GameEndManager.Instance?.EndGame("Game Over");
     }
 
+    // Freezes only the player who escaped
     [ClientRpc]
     [System.Obsolete]
     void FreezePlayerClientRpc(ulong clientId)
@@ -183,6 +202,7 @@ public class GameManager : NetworkBehaviour
         GameEndManager.Instance?.EndGame("Escaped");
     }
 
+    // Sends final match results to all clients so summary scene can read them
     [ClientRpc]
     void SendFinalResultsClientRpc(
     int p1Money, float p1Time, int p1Score,
@@ -197,6 +217,7 @@ public class GameManager : NetworkBehaviour
         FinalGameData.player2Score = p2Score;
     }
 
+    // Called by the safe to begin the global countdown
     [ServerRpc(RequireOwnership = false)]
     public void StartTimerServerRpc(ServerRpcParams rpcParams = default)
     {

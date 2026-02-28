@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 
+// Detects when a player enters the exit trigger and requests an escape from the server
 public class ExitZone : MonoBehaviour
 {
     [System.Obsolete]

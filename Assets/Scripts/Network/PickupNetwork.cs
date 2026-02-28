@@ -1,6 +1,7 @@
 ﻿using Unity.Netcode;
 using UnityEngine;
 
+// Handles server validated item pickups and synchronizes their removal across clients
 public class PickupNetwork : NetworkBehaviour
 {
     [Header("Pickup")]

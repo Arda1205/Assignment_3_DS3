@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+// Handles raycast-based interaction logic for the local player
 public class PlayerInteraction : MonoBehaviour
 {
     public float interactRange = 5f;
@@ -29,6 +30,7 @@ public class PlayerInteraction : MonoBehaviour
             Debug.Log("Auto Hold: " + debugAutoHold);
         }
 
+        // If not looking at anything valid, cancel any ongoing hold
         if (currentLookTarget == null)
         {
             if (holding)
@@ -49,7 +51,7 @@ public class PlayerInteraction : MonoBehaviour
         {
             if (!holding)
             {
-                // starting hold
+                // Starting hold
                 holding = true;
 
                 if (currentType == "Safe" && currentSafeNetwork != null)
@@ -57,17 +59,18 @@ public class PlayerInteraction : MonoBehaviour
                     currentSafeNetwork.StartHoldServerRpc();
                 }
 
+                // Start UI progress locally.
                 pickupUI.StartInteraction(currentLookTarget, currentType);
             }
 
-            // continue filling UI (local visual)
+            // Continue filling UI (local visual)
             pickupUI.Fill(Time.deltaTime);
         }
         else
         {
             if (holding)
             {
-                // stopping hold
+                // Stopping hold
                 if (currentType == "Safe" && currentSafeNetwork != null)
                 {
                     currentSafeNetwork.StopHoldServerRpc();
@@ -79,6 +82,7 @@ public class PlayerInteraction : MonoBehaviour
         }
     }
 
+    // Performs raycast forward to detect interactable objects
     void HandleRaycast()
     {
         Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
@@ -111,6 +115,7 @@ public class PlayerInteraction : MonoBehaviour
             }
         }
 
+        // If raycast did not hit anything valid, clear interaction state
         ClearTarget();
     }
 
@@ -121,6 +126,7 @@ public class PlayerInteraction : MonoBehaviour
         crosshairScript.SetInteract(true);
     }
 
+    // Clears interaction state and resets UI if needed
     void ClearTarget()
     {
         if (currentLookTarget != null && holding)

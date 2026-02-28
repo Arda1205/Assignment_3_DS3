@@ -2,6 +2,7 @@
 using UnityEngine.InputSystem;
 using Unity.Netcode; // NEW
 
+// Controls player movement, camera rotation, and local input handling in a networked context
 public class PlayerController : NetworkBehaviour // NEW
 {
     [Header("Movement")]
@@ -14,7 +15,6 @@ public class PlayerController : NetworkBehaviour // NEW
 
     float xRotation = 0f;
 
-    // --------- Gravity ---------
     [Header("Gravity")]
     public float gravity = -9.81f;
     private float yVelocity;

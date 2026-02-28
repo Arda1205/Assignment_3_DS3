@@ -2,6 +2,7 @@ using UnityEngine;
 using Unity.Netcode;
 using System.Collections.Generic;
 
+// Provides spawn positions for players based on their client ID
 public class SpawnManager : MonoBehaviour
 {
     public static SpawnManager Instance;
@@ -19,7 +20,7 @@ public class SpawnManager : MonoBehaviour
         if (clientId < (ulong)spawnPoints.Length)
             return spawnPoints[clientId].position;
 
-        // fallback
+        // Fallback
         return spawnPoints[0].position;
     }
 }

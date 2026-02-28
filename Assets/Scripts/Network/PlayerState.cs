@@ -1,6 +1,7 @@
 using UnityEngine;
 using Unity.Netcode;
 
+// Stores and synchronizes player specific data such as money across the network
 public class PlayerState : NetworkBehaviour
 {
     public NetworkVariable<int> Money = new NetworkVariable<int>(

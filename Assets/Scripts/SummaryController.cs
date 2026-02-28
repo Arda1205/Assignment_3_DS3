@@ -2,6 +2,7 @@ using UnityEngine;
 using TMPro;
 using System.Collections;
 
+// Controls the summary scene sequence and displays final scores and winner
 public class SummaryController : MonoBehaviour
 {
     [Header("Player 1 UI")]
@@ -30,28 +31,28 @@ public class SummaryController : MonoBehaviour
     {
         yield return new WaitForSecondsRealtime(2f);
 
-        // ---- MONEY ----
+        // Money
         p1MoneyText.text = FinalGameData.player1Money + "$";
         p2MoneyText.text = FinalGameData.player2Money + "$";
         PlaySFX();
 
         yield return new WaitForSecondsRealtime(2f);
 
-        // ---- TIME ----
+        // Time
         p1TimeText.text = FormatTime(FinalGameData.player1TimeLeft);
         p2TimeText.text = FormatTime(FinalGameData.player2TimeLeft);
         PlaySFX();
 
         yield return new WaitForSecondsRealtime(2f);
 
-        // ---- SCORE ----
+        // Score
         p1ScoreText.text = "Total Score: " + FinalGameData.player1Score;
         p2ScoreText.text = "Total Score: " + FinalGameData.player2Score;
         PlaySFX();
 
         yield return new WaitForSecondsRealtime(2f);
 
-        // ---- WINNER ----
+        // Winner
         if (FinalGameData.player1Score > FinalGameData.player2Score)
             winnerText.text = "Winner is... Player 1!";
         else if (FinalGameData.player2Score > FinalGameData.player1Score)

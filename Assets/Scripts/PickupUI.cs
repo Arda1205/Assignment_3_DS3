@@ -4,6 +4,7 @@ using TMPro;
 using Unity.Netcode;
 using System;
 
+// Manages interaction progress bars and visual feedback for item and safe interactions
 public class PickupUI : MonoBehaviour
 {
     [Header("BARS")]
@@ -43,12 +44,12 @@ public class PickupUI : MonoBehaviour
     [Obsolete]
     void Start()
     {
-        // init bars to 0..100
+        // Init bars to 0..100
         SetupBar(safeBar);
         SetupBar(moneyBar);
         SetupBar(valuableBar);
 
-        // find PlayerState on same prefab (this canvas is on the player prefab)
+        // Find PlayerState on same prefab (this canvas is on the player prefab)
         myState = GetComponentInParent<PlayerState>();
         if (myState != null)
         {
@@ -60,7 +61,7 @@ public class PickupUI : MonoBehaviour
             UpdateMoneyText(0);
         }
 
-        // auto-find safe if not assigned
+        // Auto-find safe if not assigned
         if (safeParent == null)
         {
             var found = GameObject.FindWithTag("Safe");
@@ -73,10 +74,10 @@ public class PickupUI : MonoBehaviour
             var safeNet = safeParent.GetComponent<SafeNetwork>();
             if (safeNet != null)
             {
-                // initial set
+                // Initial set
                 safeBar.value = safeNet.Progress.Value * 100f;
 
-                // subscribe
+                // Aubscribe
                 safeNet.Progress.OnValueChanged += (oldv, newv) => { safeBar.value = newv * 100f; };
 
                 safeNet.IsOpen.OnValueChanged += (oldv, newv) => {
@@ -86,7 +87,7 @@ public class PickupUI : MonoBehaviour
         }
 
 
-        // auto find countdown timer if null
+        // Auto find countdown timer if null
         if (countdownTimer == null)
         {
             countdownTimer = FindObjectOfType<CountdownTimer>();
@@ -133,8 +134,7 @@ public class PickupUI : MonoBehaviour
         {
             case "Safe":
                 // safe progress is authoritative on server; we still show local increment while player holds
-                // local bar will be overwritten by SafeNetwork.Progress OnValueChanged subscription.
-                // Keep a small local visual if you want:
+                // local bar will be overwritten by SafeNetwork.Progress OnValueChanged subscription
                 break;
 
             case "Money":
