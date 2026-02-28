@@ -52,6 +52,7 @@ public class GameManager : NetworkBehaviour
         }
     }
 
+    [System.Obsolete]
     public void RegisterEscape(ulong clientId)
     {
         if (!IsServer || gameEnded) return;
@@ -68,6 +69,7 @@ public class GameManager : NetworkBehaviour
         }
     }
 
+    [System.Obsolete]
     void EndGameServer()
     {
         if (gameEnded) return;
@@ -165,12 +167,14 @@ public class GameManager : NetworkBehaviour
     }
 
     [ClientRpc]
+    [System.Obsolete]
     void FreezeAllClientRpc()
     {
         GameEndManager.Instance?.EndGame("Game Over");
     }
 
     [ClientRpc]
+    [System.Obsolete]
     void FreezePlayerClientRpc(ulong clientId)
     {
         if (NetworkManager.Singleton.LocalClientId != clientId) return;

@@ -20,6 +20,12 @@ public class GameEndManager : MonoBehaviour
 
         Debug.Log("GAME OVER: " + reason);
 
+        // Stop timer audio
+        var timer = FindObjectOfType<CountdownTimer>();
+        if (timer != null)
+            timer.StopAllAudio();
+
+        // Disable local player movement
         foreach (var player in FindObjectsOfType<PlayerController>())
         {
             if (player.IsOwner)

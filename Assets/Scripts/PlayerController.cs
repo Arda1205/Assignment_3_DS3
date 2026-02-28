@@ -21,30 +21,31 @@ public class PlayerController : NetworkBehaviour // NEW
 
     public override void OnNetworkSpawn()
     {
-        // find player's canvas and enable only for the owner
+        if (IsServer)
+        {
+            Vector3 spawnPos = SpawnManager.Instance.GetSpawnPosition(OwnerClientId);
+            SetSpawnClientRpc(spawnPos);
+        }
+
+        SetupVisuals();
+    }
+
+    void SetupVisuals()
+    {
         var canvas = GetComponentInChildren<UnityEngine.Canvas>(true);
         if (canvas != null)
-        {
             canvas.gameObject.SetActive(IsOwner);
-        }
 
-        
-        // Hide local player mesh
         var capsuleRenderer = GetComponentInChildren<MeshRenderer>();
         if (capsuleRenderer != null)
-        {
             capsuleRenderer.enabled = !IsOwner;
-        }
 
-        // Local camera only for owner
         if (!IsOwner)
         {
             if (playerCamera != null) playerCamera.enabled = false;
-            // we return so we don't lock the cursor for non-local players
             return;
         }
 
-        // For the local owner: lock cursor and enable camera
         if (playerCamera != null) playerCamera.enabled = true;
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -103,5 +104,15 @@ public class PlayerController : NetworkBehaviour // NEW
 
         // horizontal (rotate body in place)
         transform.localRotation *= Quaternion.Euler(0f, mouseX, 0f);
+    }
+
+    [ClientRpc]
+    void SetSpawnClientRpc(Vector3 spawnPos)
+    {
+        if (!IsOwner) return;
+
+        playerController.enabled = false;
+        transform.position = spawnPos;
+        playerController.enabled = true;
     }
 }
